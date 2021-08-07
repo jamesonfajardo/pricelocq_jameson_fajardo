@@ -90,33 +90,37 @@ class _LandingPageState extends State<LandingPage> {
       accessKey: widget.accessToken,
     );
 
-    setState(() {
-      // sea oil
-      stationData = jsonDecode(response.body)['data'];
-      stationDataStatus = jsonDecode(response.body)['status'];
-      stationDataStatusCode = response.statusCode;
+    // create sorted map
+    stationData = jsonDecode(response.body)['data'];
+    var sortedMap = [];
 
+    List.generate(stationData.length, (index) {
+      sortedMap.add({
+        'id': stationData[index]['id'],
+        'area': stationData[index]['area'],
+        'province': stationData[index]['province'],
+        'address': stationData[index]['address'],
+        'branchLat': stationData[index]['lat'],
+        'branchLon': stationData[index]['lng'],
+        'distanceFromMe': LocationController.distanceBetweenInKM(
+          startLatitude: position.latitude,
+          startLongitude: position.longitude,
+          endLatitude: double.parse(stationData[index]['lat']),
+          endLongitude: double.parse(stationData[index]['lng']),
+        ),
+      });
+    });
+
+    sortedMap
+        .sort((a, b) => a["distanceFromMe"].compareTo(b["distanceFromMe"]));
+
+    setState(() {
       // geolocator
       myLatitude = position.latitude;
       myLongitude = position.longitude;
 
-      // create a new map that contains the essential data
-      List.generate(stationData.length, (index) {
-        stationMap.add({
-          'id': stationData[index]['id'],
-          'area': stationData[index]['area'],
-          'province': stationData[index]['province'],
-          'address': stationData[index]['address'],
-          'branchLat': stationData[index]['lat'],
-          'branchLon': stationData[index]['lng'],
-          'distanceFromMe': LocationController.distanceBetweenInKM(
-            startLatitude: position.latitude,
-            startLongitude: position.longitude,
-            endLatitude: double.parse(stationData[index]['lat']),
-            endLongitude: double.parse(stationData[index]['lng']),
-          ),
-        });
-      });
+      // complete map data
+      stationMap = sortedMap;
     });
   }
 
@@ -124,8 +128,6 @@ class _LandingPageState extends State<LandingPage> {
   void initState() {
     super.initState();
     print('init state activate');
-    // locationControllerInitialize();
-    // getStationData();
     initializeLandingPageData();
   }
 
