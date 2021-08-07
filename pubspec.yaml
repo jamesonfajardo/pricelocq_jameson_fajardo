@@ -1,0 +1,46 @@
+name: pricelocq
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+
+  # external packages
+  country_icons: ^2.0.2
+  http: ^0.13.3
+  geolocator: ^7.4.0
+  google_maps_flutter: ^2.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - asset/img/
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: poppins
+  #     fonts:
+  #       - asset: asset/font/poppins/Poppins-Regular.ttf
+  #       - asset: asset/font/poppins/Poppins-Medium.ttf
+  #       - asset: asset/font/poppins/Poppins-SemiBold.ttf
+  #       - asset: asset/font/poppins/Poppins-Bold.ttf
