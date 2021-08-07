@@ -67,6 +67,6 @@ class LocationController {
       endLatitude,
       endLongitude,
     );
-    return distanceInMeters / 1000;
+    return (distanceInMeters / 1000);
   }
 }

@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
-import '../controller/locationController.dart';
 
 class RadioTile extends StatelessWidget {
   RadioTile({
     this.value,
     this.groupValue,
-    this.callback,
+    this.radioCallback,
+    this.tileCallback,
     this.branchName,
-    this.myLatitude,
-    this.myLongitude,
-    this.destinationLatitude,
-    this.destinationLonitude,
+    this.distanceBetween,
+    // this.myLatitude,
+    // this.myLongitude,
+    // this.destinationLatitude,
+    // this.destinationLonitude,
   });
 
+  final String? distanceBetween;
   final int? value;
   final int? groupValue;
-  final ValueChanged? callback;
+  final ValueChanged? radioCallback;
+  final void Function()? tileCallback;
   final String? branchName;
 
-  final double? myLatitude;
-  final double? myLongitude;
-  final double? destinationLatitude;
-  final double? destinationLonitude;
+  // final double? myLatitude;
+  // final double? myLongitude;
+  // final double? destinationLatitude;
+  // final double? destinationLonitude;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
+    return GestureDetector(
+      onTap: tileCallback ?? () => print('object'),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -40,24 +44,19 @@ class RadioTile extends StatelessWidget {
             ),
             SizedBox(height: 4),
             Text(
-              '${LocationController.distanceBetweenInKM(
-                startLatitude: myLatitude,
-                startLongitude: myLongitude,
-                endLatitude: destinationLatitude,
-                endLongitude: destinationLonitude,
-              ).toStringAsFixed(1)} km',
+              '$distanceBetween km away from you',
               style: TextStyle(
                 fontSize: 10,
               ),
             ),
           ],
         ),
-        Radio(
+        trailing: Radio(
           value: value ?? -2,
           groupValue: groupValue ?? -1,
-          onChanged: callback ?? (val) => print('callback goes here'),
+          onChanged: radioCallback ?? (val) => print('callback goes here'),
         ),
-      ],
+      ),
     );
   }
 }

@@ -38,6 +38,7 @@ class _LandingPageState extends State<LandingPage> {
   double destinationLon = 0;
   // api data var
   dynamic stationData;
+  dynamic stationMap = [];
   String? stationDataStatus;
   int? stationDataStatusCode;
   // radio btn var
@@ -53,32 +54,69 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  // ! GEOLOCATOR HANDLER
-  void locationControllerInitialize() async {
+  // ! GOOGLE MAPS SCRIPT
+  Completer<GoogleMapController> _controller = Completer();
+
+  // change map location
+  changeMapLocation({index, updatedValue}) async {
+    setState(() {
+      groupValue = updatedValue;
+    });
+    // update map position
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(
+            double.parse(stationData[index]['lat']),
+            double.parse(stationData[index]['lng']),
+          ),
+          zoom: 19,
+        ),
+      ),
+    );
+  }
+
+  // ! COMBINED METHODS
+  void initializeLandingPageData() async {
+    // geolocator
     LocationController locationController =
         LocationController(context: context);
     var position = await locationController.initStateGetCurrentLocation();
 
-    setState(() {
-      myLatitude = position.latitude;
-      myLongitude = position.longitude;
-    });
-  }
-
-  // ! GOOGLE MAPS SCRIPT
-  Completer<GoogleMapController> _controller = Completer();
-
-  // ! SEAOIL STATIONS
-  void getStationData() async {
+    // sea oil
     var response = await ApiController.getStationCoords(
       url: kStationEndpoint,
       accessKey: widget.accessToken,
     );
 
     setState(() {
+      // sea oil
       stationData = jsonDecode(response.body)['data'];
       stationDataStatus = jsonDecode(response.body)['status'];
       stationDataStatusCode = response.statusCode;
+
+      // geolocator
+      myLatitude = position.latitude;
+      myLongitude = position.longitude;
+
+      // create a new map that contains the essential data
+      List.generate(stationData.length, (index) {
+        stationMap.add({
+          'id': stationData[index]['id'],
+          'area': stationData[index]['area'],
+          'province': stationData[index]['province'],
+          'address': stationData[index]['address'],
+          'branchLat': stationData[index]['lat'],
+          'branchLon': stationData[index]['lng'],
+          'distanceFromMe': LocationController.distanceBetweenInKM(
+            startLatitude: position.latitude,
+            startLongitude: position.longitude,
+            endLatitude: double.parse(stationData[index]['lat']),
+            endLongitude: double.parse(stationData[index]['lng']),
+          ),
+        });
+      });
     });
   }
 
@@ -86,8 +124,9 @@ class _LandingPageState extends State<LandingPage> {
   void initState() {
     super.initState();
     print('init state activate');
-    locationControllerInitialize();
-    getStationData();
+    // locationControllerInitialize();
+    // getStationData();
+    initializeLandingPageData();
   }
 
   @override
@@ -115,7 +154,7 @@ class _LandingPageState extends State<LandingPage> {
                 myLocationButtonEnabled: true,
                 initialCameraPosition: CameraPosition(
                   target: LatLng(myLatitude, myLongitude),
-                  zoom: 18,
+                  zoom: 19,
                 ),
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
@@ -147,19 +186,7 @@ class _LandingPageState extends State<LandingPage> {
                     // ! change map position
                     onPressed: destinationLat == 0 || destinationLat == 0
                         ? null
-                        : () async {
-                            final GoogleMapController controller =
-                                await _controller.future;
-                            controller.animateCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(
-                                  target:
-                                      LatLng(destinationLat, destinationLon),
-                                  zoom: 18,
-                                ),
-                              ),
-                            );
-                          },
+                        : () => print('test'),
                     child: Text('Done'),
                   )
                 ],
@@ -169,32 +196,30 @@ class _LandingPageState extends State<LandingPage> {
             Expanded(
               child: SafeArea(
                 child: ListView(
-                  children: stationData == null || isMapLoaded == false
+                  children: stationMap == [] || isMapLoaded == false
                       ? [Center(child: Text('loading Data'))]
                       : List.generate(
-                          stationData.length,
+                          stationMap.length,
                           (index) {
-                            // return Text('${stationData[index]['id']}');
                             return RadioTile(
-                              value: stationData[index]['id'],
+                              value: stationMap[index]['id'],
                               groupValue: groupValue,
-                              callback: (val) {
-                                setState(() {
-                                  groupValue = val;
-                                  destinationLon =
-                                      double.parse(stationData[index]['lng']);
-                                  destinationLat =
-                                      double.parse(stationData[index]['lat']);
-                                });
+                              tileCallback: () {
+                                changeMapLocation(
+                                  index: index,
+                                  updatedValue: stationMap[index]['id'],
+                                );
+                              },
+                              radioCallback: (radioValue) {
+                                changeMapLocation(
+                                  index: index,
+                                  updatedValue: radioValue,
+                                );
                               },
                               branchName:
-                                  'SEAOIL ${stationData[index]['area']} - ${stationData[index]['province']}',
-                              myLatitude: myLatitude,
-                              myLongitude: myLongitude,
-                              destinationLatitude:
-                                  double.parse(stationData[index]['lat']),
-                              destinationLonitude:
-                                  double.parse(stationData[index]['lng']),
+                                  'SEAOIL ${stationMap[index]['area']} - ${stationMap[index]['province']}',
+                              distanceBetween:
+                                  '${stationMap[index]['distanceFromMe']}',
                             );
                           },
                         ),

@@ -1,11 +1,11 @@
+// _TypeError (type '(dynamic, dynamic) => dynamic' is not a subtype of type '((dynamic, dynamic) => int)?' of 'compare')
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:geolocator/geolocator.dart';
-
-import '../controller/locationController.dart';
 
 void main() => runApp(Debug());
 
@@ -62,25 +62,49 @@ class MapSampleState extends State<MapSample> {
 
 // ! others
 
+  int add(n1, n2) {
+    return n1 + n2;
+  }
+
   @override
   void initState() {
     super.initState();
     print('INIT STATE_____----------');
-    getLoc();
+
+    List.generate(r1.length, (index) {
+      r2.add({
+        'name': r1[index]['name'],
+        'total': add(r1[index]['n1'], r1[index]['n2']),
+      });
+    });
+
+    // getLoc();
   }
+
+  var r1 = [
+    {'name': 'jameson', 'n1': 1, 'n2': 6},
+    {'name': 'irene', 'n1': 2, 'n2': 7},
+    {'name': 'yuki', 'n1': 3, 'n2': 8},
+    {'name': 'gramps', 'n1': 4, 'n2': 9},
+    {'name': 'granma', 'n1': 5, 'n2': 10},
+  ];
+
+  var r2 = [];
 
   @override
   Widget build(BuildContext context) {
-    print('DISTANCE BETWEEN 2 POINTS');
-    print(LocationController.distanceBetweenInKM(
-      startLatitude: 14.46618,
-      startLongitude: 121.0228717,
-      endLatitude: 14.39764,
-      endLongitude: 120.868896,
-    ));
+    // print('DISTANCE BETWEEN 2 POINTS');
+    // print(LocationController.distanceBetweenInKM(
+    //   startLatitude: 14.46618,
+    //   startLongitude: 121.0228717,
+    //   endLatitude: 14.39764,
+    //   endLongitude: 120.868896,
+    // ));
 
-    print(myLat);
-    print(myLon);
+    print('r2 $r2');
+
+    // print(myLat);
+    // print(myLon);
     return Scaffold(
       body: myLat == 0 || myLon == 0
           ? Center(child: Text('loading google map'))
