@@ -32,32 +32,30 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   // appbar toggler
-  bool isUserSearching = false;
+  bool isUserSearching = false; // used to toggle elements dependent on search
   // geoloc var
   double myLatitude = 0;
   double myLongitude = 0;
   // googlemap var
-  bool isMapLoaded = false;
-  double destinationLat = 0;
-  double destinationLon = 0;
+  bool isMapLoaded = false; // used to render elements after google map loads
   // api data var
-  dynamic stationData; // for debugging purposes only
-  dynamic stationMap = []; // ! single source of truth
-  String? apiStatusMessage;
+  dynamic stationData; // raw api data
+  dynamic stationMap = []; // used for rendering sorted data
+  String? apiStatusMessage; // used for error handling
   // search related variables
-  dynamic foundStations = [];
-  int? selectedStationId;
-  int? selectedStationIndex;
-  String? textfieldValue = '';
-  bool showStationSummary = false;
+  dynamic foundStations = []; // used for rendering search results
+  int? selectedStationId; // used to fetch station specific info
+  int? selectedStationIndex; // used to fetch station specific info
+  String? textfieldValue = ''; // used to fetch station specific info
+  bool showStationSummary = false; // render station summary based on T or F
   // radio btn var
   int? groupValue;
 
-  // ! GOOGLE MAPS SCRIPT ---------
+  // ! GOOGLE MAPS SCRIPT START ---------
   Completer<GoogleMapController> _controller = Completer();
 
   // change map location
-  changeMapLocation({index, updatedValue}) async {
+  changeMapLocation({jsonBody, index, updatedValue}) async {
     setState(() {
       groupValue = updatedValue;
     });
@@ -67,8 +65,8 @@ class _LandingPageState extends State<LandingPage> {
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(
-            double.parse(stationMap[index]['branchLat']),
-            double.parse(stationMap[index]['branchLon']),
+            double.parse(jsonBody[index]['lat']),
+            double.parse(jsonBody[index]['lng']),
           ),
           zoom: 19,
         ),
@@ -76,27 +74,7 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  // change map location on search select
-  changeMapLocationOnSearch({index, updatedValue}) async {
-    setState(() {
-      groupValue = updatedValue;
-    });
-    // update map position
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(
-            double.parse(stationData[index]['lat']),
-            double.parse(stationData[index]['lng']),
-          ),
-          zoom: 19,
-        ),
-      ),
-    );
-  }
-
-  // return to your location
+  // return to my location
   backToMyLocation() async {
     // update map position
     final GoogleMapController controller = await _controller.future;
@@ -112,20 +90,9 @@ class _LandingPageState extends State<LandingPage> {
       ),
     );
   }
+  // ! GOOGLE MAPS SCRIPT END ---------
 
-  // reset search related variabled
-  resetSearch() {
-    setState(() {
-      groupValue = -9999;
-      showStationSummary = false;
-      selectedStationId = null;
-      selectedStationIndex = null;
-      textfieldValue = '';
-    });
-  }
-  // ! GOOGLE MAPS SCRIPT ---------
-
-  // ! search station ------------
+  // ! SEARCH RELATED FUNCTIONS START ------------
   void searchStation(keyword) {
     var results = [];
     if (keyword.isEmpty) {
@@ -139,15 +106,24 @@ class _LandingPageState extends State<LandingPage> {
           .toList();
     }
 
-    // print(results);
-
     setState(() {
       foundStations = results;
     });
   }
-  // ! search station ------------
 
-  // ! COMBINED METHODS
+  // reset search related variables
+  resetSearch() {
+    setState(() {
+      groupValue = -9999;
+      showStationSummary = false;
+      selectedStationId = null;
+      selectedStationIndex = null;
+      textfieldValue = '';
+    });
+  }
+  // ! SEARCH RELATED FUNCTIONS END ------------
+
+  // ! FETCH AND PROCESS API DATA START ------------
   void initializeLandingPageData() async {
     // geolocator
     LocationController locationController =
@@ -184,8 +160,8 @@ class _LandingPageState extends State<LandingPage> {
           'city': stationData[index]['city'],
           'province': stationData[index]['province'],
           'address': stationData[index]['address'],
-          'branchLat': stationData[index]['lat'],
-          'branchLon': stationData[index]['lng'],
+          'lat': stationData[index]['lat'],
+          'lng': stationData[index]['lng'],
           'distanceFromMe': LocationController.distanceBetweenInKM(
             startLatitude: position.latitude,
             startLongitude: position.longitude,
@@ -213,6 +189,7 @@ class _LandingPageState extends State<LandingPage> {
       foundStations = sortedMap;
     });
   }
+  // ! FETCH AND PROCESS API DATA END ------------
 
   @override
   void initState() {
@@ -224,32 +201,27 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
 
-// todo
-    // print(selectedStationId);
-    // print(stationData[selectedStationIndex]);
-    // print('selectedStationId: $selectedStationId');
-    // print('selectedStationIndex: $selectedStationIndex');
-    // print('textfieldValue: $textfieldValue');
-    // print('showStationSummary: $showStationSummary');
-// todo
-
     return Scaffold(
       // disables resizing of window when keboard is present
       resizeToAvoidBottomInset: false,
-      // toggle textfield
       // ! ================== APP BAR ==================
       appBar: dynamicAppBar(
         isUserSearching: isUserSearching,
         iconTapCallback: () {
           setState(() {
+            // toggle textfield
             if (!isUserSearching) {
               isUserSearching = true;
-              // resetSearch();
             } else {
               isUserSearching = false;
               if (selectedStationIndex != null && textfieldValue != '') {
                 showStationSummary = true;
-                changeMapLocationOnSearch(
+                /*
+                ** if textfield is not empty, and a result is selected,
+                ** move to the said location on pressing close search btn
+                */
+                changeMapLocation(
+                  jsonBody: stationData,
                   index: selectedStationIndex,
                   updatedValue: selectedStationId,
                 );
@@ -289,17 +261,10 @@ class _LandingPageState extends State<LandingPage> {
             ),
       // ! ================== BOTTOM SHEET ==================
       bottomSheet: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 8,
-        ),
-        // if user is searching, make the bottomsheet fullscreen
-        height: screenHeight / (isUserSearching == false ? 3 : 1),
-        width: double.infinity,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ! nearby stations
+            // ! bottomsheet header
             Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -327,7 +292,8 @@ class _LandingPageState extends State<LandingPage> {
                 ],
               ),
             ),
-            // ! station data
+            // ! station data / bottomsheet body
+            // show the station complete info in this widget
             showStationSummary
                 ? Expanded(
                     child: SummaryCard(
@@ -344,12 +310,17 @@ class _LandingPageState extends State<LandingPage> {
                       ),
                     ),
                   )
+                // show sorted station data
                 : Expanded(
+                    // use safe area to avoid OS interfaces like notch, etc.
                     child: SafeArea(
                       child: stationMap.isEmpty || isMapLoaded == false
                           ? Center(
-                              child: Text(apiStatusMessage ?? 'Loading Data'))
+                              // render when app is still loading
+                              child: Text(apiStatusMessage ?? 'Loading Data'),
+                            )
                           : foundStations.length > 0
+                              // render sorted data
                               ? ListView(
                                   children: List.generate(
                                     foundStations.length,
@@ -359,11 +330,13 @@ class _LandingPageState extends State<LandingPage> {
                                         groupValue: groupValue,
                                         tileCallback: () {
                                           changeMapLocation(
+                                            jsonBody: stationMap,
                                             index: index,
                                             updatedValue: foundStations[index]
                                                 ['id'],
                                           );
                                           if (textfieldValue != '') {
+                                            // assign particular values when clicked
                                             setState(() {
                                               selectedStationId =
                                                   foundStations[index]['id'];
@@ -374,10 +347,12 @@ class _LandingPageState extends State<LandingPage> {
                                         },
                                         radioCallback: (radioValue) {
                                           changeMapLocation(
+                                            jsonBody: stationMap,
                                             index: index,
                                             updatedValue: radioValue,
                                           );
                                           if (textfieldValue != '') {
+                                            // assign particular values when clicked
                                             setState(() {
                                               selectedStationId =
                                                   foundStations[index]['id'];
@@ -395,13 +370,21 @@ class _LandingPageState extends State<LandingPage> {
                                   ),
                                 )
                               : Center(
+                                  // render when search has no results
                                   child: Text('No Results Found'),
                                 ),
                     ),
                   )
           ],
         ),
-        // bottom sheet style
+        // ! BOTTOMSHEET STYLE
+        padding: EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 8,
+        ),
+        // if user is searching, make the bottomsheet fullscreen
+        height: screenHeight / (isUserSearching == false ? 3 : 1),
+        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [

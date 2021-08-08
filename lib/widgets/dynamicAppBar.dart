@@ -12,7 +12,6 @@ AppBar dynamicAppBar({isUserSearching, iconTapCallback, textFieldCallback}) {
               padding: EdgeInsets.only(bottom: 30),
               width: 300,
               child: TextField(
-                autofocus: true,
                 onChanged: textFieldCallback,
                 decoration: InputDecoration(
                   filled: true,
