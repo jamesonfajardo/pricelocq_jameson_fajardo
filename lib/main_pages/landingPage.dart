@@ -27,7 +27,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  // bappbar toggler
+  // appbar toggler
   bool isUserSearching = false;
   // geoloc var
   double myLatitude = 0;
@@ -119,6 +119,10 @@ class _LandingPageState extends State<LandingPage> {
       myLatitude = position.latitude;
       myLongitude = position.longitude;
 
+      // seaoil
+      stationDataStatus = jsonDecode(response.body)['status'];
+      stationDataStatusCode = response.statusCode;
+
       // complete map data
       stationMap = sortedMap;
     });
@@ -199,7 +203,14 @@ class _LandingPageState extends State<LandingPage> {
               child: SafeArea(
                 child: ListView(
                   children: stationMap == [] || isMapLoaded == false
-                      ? [Center(child: Text('loading Data'))]
+                      ? [
+                          Center(
+                              child: Text(stationDataStatus == 'failed' ||
+                                      stationDataStatusCode != 200
+                                  ? 'Loading Failed, please try again'
+                                  : 'loading Data'))
+                        ]
+                      // render the api into a widget
                       : List.generate(
                           stationMap.length,
                           (index) {
@@ -221,7 +232,7 @@ class _LandingPageState extends State<LandingPage> {
                               branchName:
                                   'SEAOIL ${stationMap[index]['area']} - ${stationMap[index]['province']}',
                               distanceBetween:
-                                  '${stationMap[index]['distanceFromMe']}',
+                                  '${stationMap[index]['distanceFromMe'].toInt()}',
                             );
                           },
                         ),
