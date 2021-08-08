@@ -67,8 +67,8 @@ class _LandingPageState extends State<LandingPage> {
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(
-            double.parse(stationData[index]['lat']),
-            double.parse(stationData[index]['lng']),
+            double.parse(stationMap[index]['branchLat']),
+            double.parse(stationMap[index]['branchLon']),
           ),
           zoom: 19,
         ),
@@ -146,6 +146,9 @@ class _LandingPageState extends State<LandingPage> {
     super.initState();
     initializeLandingPageData();
   }
+
+  // ! ------------
+  // ! ------------
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +255,8 @@ class _LandingPageState extends State<LandingPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
+              color:
+                  Colors.grey.withOpacity(isUserSearching == false ? 0.5 : 0),
               spreadRadius: 5,
               blurRadius: 7,
               offset: Offset(0, 3), // changes position of shadow

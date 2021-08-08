@@ -128,7 +128,6 @@ class _LoginState extends State<Login> {
                     // snackbarManager = custom code for showing snackbars
                     snackbarManager(context, jsonBody['data']['message']);
                   } else if (jsonBody['status'] == 'success') {
-                    print('login success: $jsonBody');
                     // if login status is successful
                     Navigator.push(
                       context,

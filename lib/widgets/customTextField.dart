@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 // const
 import '../const/colors.dart';
 import '../const/fonts.dart';
-import 'package:pricelocq/const/spaces.dart';
 
 class CustomTextField extends StatelessWidget {
   CustomTextField({
@@ -34,7 +33,10 @@ class CustomTextField extends StatelessWidget {
       children: [
         // container will hold the elements making up the widget
         Container(
-          padding: kDefaultPadding,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
           // the widget is divided in to 2 parts,
           // the labelText and the textfield itself
           // so we use column
