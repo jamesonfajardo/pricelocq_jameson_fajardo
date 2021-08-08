@@ -189,6 +189,7 @@ class _LandingPageState extends State<LandingPage> {
           horizontal: 24,
           vertical: 8,
         ),
+        // if user is searching, make the bottomsheet fullscreen
         height: screenHeight / (isUserSearching == false ? 3 : 1),
         width: double.infinity,
         child: Column(
