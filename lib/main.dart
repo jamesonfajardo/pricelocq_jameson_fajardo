@@ -11,6 +11,10 @@ import 'main_pages/debug.dart';
 import 'const/colors.dart';
 import 'const/fonts.dart';
 
+// APP DATA
+import 'APPDATA.dart';
+import 'package:provider/provider.dart';
+
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: kViolet, // navigation bar color
@@ -22,27 +26,30 @@ void main() {
 class PriceLocq extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      // set app defaults
-      theme: ThemeData(
-        textTheme: TextTheme(
-          bodyText2: kDefaultFontSize,
+    return ChangeNotifierProvider<APPDATA>(
+      create: (context) => APPDATA(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        // set app defaults
+        theme: ThemeData(
+          textTheme: TextTheme(
+            bodyText2: kDefaultFontSize,
+          ),
         ),
+        /*
+        ** page routes
+        ** mostly used for showing pages that do not need
+        ** data from the previous page
+        ** or when using a state management package like provider
+        ** can also be used for debugging specific pages
+        */
+        routes: {
+          '/': (context) => Login(),
+          '/landing-page': (context) => LandingPage(),
+          '/debug': (context) => Debug(),
+        },
+        initialRoute: '/',
       ),
-      /*
-      ** page routes
-      ** mostly used for showing pages that do not need
-      ** data from the previous page
-      ** or when using a state management package like provider
-      ** can also be used for debugging specific pages
-      */
-      routes: {
-        '/': (context) => Login(),
-        '/landing-page': (context) => LandingPage(),
-        '/debug': (context) => Debug(),
-      },
-      initialRoute: '/',
     );
   }
 }

@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+// APP DATA
+import '../APPDATA.dart';
+import 'package:provider/provider.dart';
+
 // widgets
 import '../widgets/dynamicAppBar.dart';
 import '../widgets/summaryCard.dart';
@@ -22,9 +26,9 @@ import '../util/snackbarManager.dart';
 import '../env.dart';
 
 class LandingPage extends StatefulWidget {
-  LandingPage({this.accessToken});
+  // LandingPage({this.accessToken});
 
-  final String? accessToken;
+  // final String? accessToken;
 
   @override
   _LandingPageState createState() => _LandingPageState();
@@ -133,7 +137,7 @@ class _LandingPageState extends State<LandingPage> {
     // sea oil
     var response = await ApiController.getStationCoords(
       url: kStationEndpoint,
-      accessKey: widget.accessToken,
+      accessKey: Provider.of<APPDATA>(context, listen: false).accessToken,
       /*
       ** try to deliberately send an invalid accessToken to see how the
       ** app respond to failed api requests

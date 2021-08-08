@@ -44,11 +44,26 @@ class SummaryCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 32),
-          Text(
-            '${distanceBetween!.toInt()} km away',
-            style: TextStyle(
-              fontSize: 12,
-            ),
+          Row(
+            children: [
+              Icon(Icons.time_to_leave),
+              SizedBox(width: 8),
+              Text(
+                '${distanceBetween!.toInt()} km away',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              SizedBox(width: 32),
+              Icon(Icons.access_time),
+              SizedBox(width: 8),
+              Text(
+                'Open 24 hours',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ],
           ),
         ],
       ),

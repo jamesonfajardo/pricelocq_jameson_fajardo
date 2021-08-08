@@ -15,6 +15,7 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   # external packages
+  provider: ^5.0.0
   country_icons: ^2.0.2
   http: ^0.13.3
   geolocator: ^7.4.0

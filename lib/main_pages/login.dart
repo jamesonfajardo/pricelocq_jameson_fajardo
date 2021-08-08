@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// APP DATA
+import '../APPDATA.dart';
+import 'package:provider/provider.dart';
+
 // main pages
 import '../main_pages/landingPage.dart';
 
@@ -26,18 +30,17 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   ApiController apiController = ApiController();
-  String? mobileNo;
-  String? password;
-  bool isBtnDisabled = true;
 
   void primaryButtonAvailability() {
-    if (mobileNo == null ||
-        password == null ||
-        mobileNo == '' ||
-        password == '') {
-      isBtnDisabled = true;
+    if (Provider.of<APPDATA>(context, listen: false).mobileNo == null ||
+        Provider.of<APPDATA>(context, listen: false).password == null ||
+        Provider.of<APPDATA>(context, listen: false).mobileNo == '' ||
+        Provider.of<APPDATA>(context, listen: false).password == '') {
+      Provider.of<APPDATA>(context, listen: false)
+          .update('isLoginBtnDisabled', true);
     } else {
-      isBtnDisabled = false;
+      Provider.of<APPDATA>(context, listen: false)
+          .update('isLoginBtnDisabled', false);
     }
   }
 
@@ -58,15 +61,14 @@ class _LoginState extends State<Login> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     callback: (value) {
-                      setState(() {
-                        mobileNo = value;
-                        /*
+                      Provider.of<APPDATA>(context, listen: false)
+                          .update('mobileNo', value);
+                      /*
                         ** if mobile number and password is supplied
                         ** activate the 'Continue' button
                         ** else, disable it
                         */
-                        primaryButtonAvailability();
-                      });
+                      primaryButtonAvailability();
                     },
                     labelText: 'Mobile No.',
                     hintText: '9123456789',
@@ -85,15 +87,14 @@ class _LoginState extends State<Login> {
                   // password
                   CustomTextField(
                     callback: (value) {
-                      setState(() {
-                        password = value;
-                        /*
+                      Provider.of<APPDATA>(context, listen: false)
+                          .update('password', value);
+                      /*
                         ** if mobile number and password is supplied
                         ** activate the 'Continue' button
                         ** else, disable it
                         */
-                        primaryButtonAvailability();
-                      });
+                      primaryButtonAvailability();
                     },
                     labelText: 'Password',
                     hintText: 'Password',
@@ -109,14 +110,19 @@ class _LoginState extends State<Login> {
 
             // "Continue" button
             PrimaryButton(
-              disableButton: isBtnDisabled,
+              disableButton: Provider.of<APPDATA>(context).isLoginBtnDisabled,
               label: 'Continue',
               // ! POST
               // post data to endpoint
               callback: () async {
                 var postData = await apiController.login(
                   url: kLoginEndpoint,
-                  body: {"mobile": '0$mobileNo', "password": password},
+                  body: {
+                    "mobile":
+                        '0${Provider.of<APPDATA>(context, listen: false).mobileNo}',
+                    "password":
+                        Provider.of<APPDATA>(context, listen: false).password
+                  },
                 );
                 var jsonBody = jsonDecode(postData.body);
                 var statusCode = postData.statusCode;
@@ -128,16 +134,14 @@ class _LoginState extends State<Login> {
                     // snackbarManager = custom code for showing snackbars
                     snackbarManager(context, jsonBody['data']['message']);
                   } else if (jsonBody['status'] == 'success') {
-                    // if login status is successful
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => LandingPage(
-                          // pass the access token to the next page
-                          accessToken: jsonBody['data']['accessToken'],
-                        ),
-                      ),
-                    );
+                    /*
+                    ** if login status is successful
+                    ** pass the access token to the next page
+                    */
+                    Provider.of<APPDATA>(context, listen: false)
+                        .update('accessToken', jsonBody['data']['accessToken']);
+
+                    Navigator.pushNamed(context, '/landing-page');
                   } else {
                     // if login status is neither fail nor success
                     // snackbarManager = custom code for showing snackbars
