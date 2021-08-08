@@ -1,132 +1,119 @@
-// _TypeError (type '(dynamic, dynamic) => dynamic' is not a subtype of type '((dynamic, dynamic) => int)?' of 'compare')
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:geolocator/geolocator.dart';
+class Debug extends StatefulWidget {
+  const Debug({Key? key}) : super(key: key);
 
-void main() => runApp(Debug());
-
-class Debug extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Google Maps Demo',
-      home: MapSample(),
-    );
-  }
+  _DebugState createState() => _DebugState();
 }
 
-class MapSample extends StatefulWidget {
-  @override
-  State<MapSample> createState() => MapSampleState();
-}
+class _DebugState extends State<Debug> {
+  List<Map<String, dynamic>> stationMap = [
+    {
+      'id': '226',
+      'area': 'LUZON',
+      'city': 'PARANAQUE',
+      'province': 'METRO MANILA',
+      'address':
+          'Lot 4964-1-2-A-4-2 DR.A. SANTOS AVENUE, SAN ISIDRO, PARANAQUE CITY',
+      'branchLat': '14.45525448',
+      'branchLon': '121.0417243',
+      'distanceFromMe': '2.366846533874309'
+    },
+    {
+      'id': '7',
+      'area': 'NCR',
+      'city': 'PARANAQUE CITY',
+      'province': 'METRO MANILA',
+      'address':
+          '8451 Dr. A. Santos Avenue Brgy. San Antonio, Sucat, Paranaque City',
+      'branchLat': '14.455111',
+      'branchLon': '121.04173',
+      'distanceFromMe': '2.375633931453743'
+    },
+    {
+      'id': '241',
+      'area': 'METRO MANILA',
+      'city': 'PARANAQUE',
+      'province': 'METRO MANILA',
+      'address': 'WEST SERVICE ROAD SAN DIONISIO MERVILLE PARANAQUE CITY',
+      'branchLat': '14.49472425',
+      'branchLon': '121.0423936',
+      'distanceFromMe': '3.807507021293104'
+    },
+    {
+      'id': 34,
+      'area': 'NCR',
+      'city': 'TAGUIG CITY',
+      'province': 'METRO MANILA',
+      'address': 'Cuasay corner MRT Avenue, Taguig City',
+      'branchLat': '14.512974',
+      'branchLon': '121.054882',
+      'distanceFromMe': '6.244440930352944'
+    },
+  ];
 
-class MapSampleState extends State<MapSample> {
-// ! GEOLOC
-  double myLat = 0;
-  double myLon = 0;
+  List<Map<String, dynamic>> foundStations = [];
 
-  void getLoc() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+  void searchStation(keyword) {
+    List<Map<String, dynamic>> results = [];
+    if (keyword.isEmpty) {
+      results = stationMap;
+    } else {
+      results = stationMap
+          .where((station) =>
+              station["address"].toLowerCase().contains(keyword.toLowerCase()))
+          .toList();
+    }
 
     setState(() {
-      myLat = position.latitude;
-      myLon = position.longitude;
+      foundStations = results;
     });
-  }
-// ! GEOLOC
-
-// ! --------------------------
-
-// ! GMAP
-  Completer<GoogleMapController> _controller = Completer();
-
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(14.39764, 120.868896),
-          zoom: 20,
-        ),
-      ),
-    );
-  }
-// ! GMAP
-
-// ! others
-
-// ! others
-
-  int add(n1, n2) {
-    return n1 + n2;
   }
 
   @override
   void initState() {
     super.initState();
-    print('INIT STATE_____----------');
-
-    List.generate(r1.length, (index) {
-      r2.add({
-        'name': r1[index]['name'],
-        'total': add(r1[index]['n1'], r1[index]['n2']),
-      });
-    });
-
-    // getLoc();
+    foundStations = stationMap;
   }
-
-  var r1 = [
-    {'name': 'jameson', 'n1': 1, 'n2': 6},
-    {'name': 'irene', 'n1': 2, 'n2': 7},
-    {'name': 'yuki', 'n1': 3, 'n2': 8},
-    {'name': 'gramps', 'n1': 4, 'n2': 9},
-    {'name': 'granma', 'n1': 5, 'n2': 10},
-  ];
-
-  var r2 = [];
 
   @override
   Widget build(BuildContext context) {
-    // print('DISTANCE BETWEEN 2 POINTS');
-    // print(LocationController.distanceBetweenInKM(
-    //   startLatitude: 14.46618,
-    //   startLongitude: 121.0228717,
-    //   endLatitude: 14.39764,
-    //   endLongitude: 120.868896,
-    // ));
-
-    print('r2 $r2');
-
-    // print(myLat);
-    // print(myLon);
+    // ! ====================
+    // searchStation('sucat');
+    // print(stationMap[0]['address']);
+    // print(stationMap);
+    print(foundStations);
+    // ! ====================
     return Scaffold(
-      body: myLat == 0 || myLon == 0
-          ? Center(child: Text('loading google map'))
-          : SafeArea(
-              child: GoogleMap(
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                zoomControlsEnabled: false,
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(myLat, myLon),
-                  zoom: 18,
-                ),
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                },
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            TextField(
+              onChanged: (value) => searchStation(value),
+              decoration: InputDecoration(
+                  labelText: 'Search', suffixIcon: Icon(Icons.search)),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: Text('To the lake!'),
-        icon: Icon(Icons.directions_boat),
+            Expanded(
+              child: foundStations.length > 0
+                  ? ListView.builder(
+                      itemCount: foundStations.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: Text(
+                              '$index. ${foundStations[index]['address']}'),
+                        );
+                      },
+                    )
+                  : Text('no results found'),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+// Card(
+//   child: Text('$index. ${foundStations[index]['address']}'),
+// )
