@@ -8,7 +8,7 @@
 <!-- external -->
 
    <application
-        android:label="pricelocq"
+        android:label="jamesonf pricelocq"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

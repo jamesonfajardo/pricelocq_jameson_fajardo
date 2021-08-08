@@ -5,9 +5,6 @@ import 'package:flutter/services.dart';
 import '../APPDATA.dart';
 import 'package:provider/provider.dart';
 
-// main pages
-import '../main_pages/landingPage.dart';
-
 // env constants
 import '../env.dart';
 
