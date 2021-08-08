@@ -39,8 +39,7 @@ class _LandingPageState extends State<LandingPage> {
   // api data var
   dynamic stationData;
   dynamic stationMap = [];
-  String? stationDataStatus;
-  int? stationDataStatusCode;
+  String? apiStatusMessage;
   // radio btn var
   int? groupValue;
 
@@ -88,40 +87,54 @@ class _LandingPageState extends State<LandingPage> {
     var response = await ApiController.getStationCoords(
       url: kStationEndpoint,
       accessKey: widget.accessToken,
+      /*
+      ** try to deliberately send an invalid accessToken to see how the
+      ** app respond to failed api requests
+      ** replace widget.accessToken with an invalid token to test
+      */
     );
 
     // create sorted map
-    stationData = jsonDecode(response.body)['data'];
     var sortedMap = [];
 
-    List.generate(stationData.length, (index) {
-      sortedMap.add({
-        'id': stationData[index]['id'],
-        'area': stationData[index]['area'],
-        'province': stationData[index]['province'],
-        'address': stationData[index]['address'],
-        'branchLat': stationData[index]['lat'],
-        'branchLon': stationData[index]['lng'],
-        'distanceFromMe': LocationController.distanceBetweenInKM(
-          startLatitude: position.latitude,
-          startLongitude: position.longitude,
-          endLatitude: double.parse(stationData[index]['lat']),
-          endLongitude: double.parse(stationData[index]['lng']),
-        ),
-      });
-    });
+    /*
+    ** if status code is an error type, don't generate anything
+    ** if the script doesn't generate anything, it will ping the
+    ** app that there's an error and show the appropriate error message
+    */
+    if (response.statusCode == 200) {
+      stationData = jsonDecode(response.body)['data'];
 
-    sortedMap
-        .sort((a, b) => a["distanceFromMe"].compareTo(b["distanceFromMe"]));
+      List.generate(stationData.length, (index) {
+        sortedMap.add({
+          'id': stationData[index]['id'],
+          'area': stationData[index]['area'],
+          'city': stationData[index]['city'],
+          'province': stationData[index]['province'],
+          'address': stationData[index]['address'],
+          'branchLat': stationData[index]['lat'],
+          'branchLon': stationData[index]['lng'],
+          'distanceFromMe': LocationController.distanceBetweenInKM(
+            startLatitude: position.latitude,
+            startLongitude: position.longitude,
+            endLatitude: double.parse(stationData[index]['lat']),
+            endLongitude: double.parse(stationData[index]['lng']),
+          ),
+        });
+      });
+
+      sortedMap
+          .sort((a, b) => a["distanceFromMe"].compareTo(b["distanceFromMe"]));
+    }
 
     setState(() {
       // geolocator
       myLatitude = position.latitude;
       myLongitude = position.longitude;
 
-      // seaoil
-      stationDataStatus = jsonDecode(response.body)['status'];
-      stationDataStatusCode = response.statusCode;
+      // seaoil - set api status
+      if (response.statusCode != 200)
+        apiStatusMessage = 'Error fetching station data';
 
       // complete map data
       stationMap = sortedMap;
@@ -131,7 +144,6 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    print('init state activate');
     initializeLandingPageData();
   }
 
@@ -201,17 +213,10 @@ class _LandingPageState extends State<LandingPage> {
             // ! station data
             Expanded(
               child: SafeArea(
-                child: ListView(
-                  children: stationMap == [] || isMapLoaded == false
-                      ? [
-                          Center(
-                              child: Text(stationDataStatus == 'failed' ||
-                                      stationDataStatusCode != 200
-                                  ? 'Loading Failed, please try again'
-                                  : 'loading Data'))
-                        ]
-                      // render the api into a widget
-                      : List.generate(
+                child: stationMap.isEmpty || isMapLoaded == false
+                    ? Center(child: Text(apiStatusMessage ?? 'Loading Data'))
+                    : ListView(
+                        children: List.generate(
                           stationMap.length,
                           (index) {
                             return RadioTile(
@@ -230,13 +235,13 @@ class _LandingPageState extends State<LandingPage> {
                                 );
                               },
                               branchName:
-                                  'SEAOIL ${stationMap[index]['area']} - ${stationMap[index]['province']}',
+                                  'SEAOIL ${stationMap[index]['province']} - ${stationMap[index]['city']}',
                               distanceBetween:
                                   '${stationMap[index]['distanceFromMe'].toInt()}',
                             );
                           },
                         ),
-                ),
+                      ),
               ),
             )
           ],
