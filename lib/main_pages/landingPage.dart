@@ -344,7 +344,9 @@ class _LandingPageState extends State<LandingPage> {
                                                 foundStations[index]['id'];
                                             selectedStationIndex =
                                                 foundStations[index]['index'];
-                                            showStationSummary = true;
+                                            if (!isUserSearching) {
+                                              showStationSummary = true;
+                                            }
                                           });
                                         },
                                         radioCallback: (radioValue) {
@@ -358,7 +360,9 @@ class _LandingPageState extends State<LandingPage> {
                                                 foundStations[index]['id'];
                                             selectedStationIndex =
                                                 foundStations[index]['index'];
-                                            showStationSummary = true;
+                                            if (!isUserSearching) {
+                                              showStationSummary = true;
+                                            }
                                           });
                                         },
                                         branchName:
