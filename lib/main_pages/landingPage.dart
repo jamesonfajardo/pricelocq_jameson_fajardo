@@ -339,15 +339,13 @@ class _LandingPageState extends State<LandingPage> {
                                             updatedValue: foundStations[index]
                                                 ['id'],
                                           );
-                                          if (textfieldValue != '') {
-                                            // assign particular values when clicked
-                                            setState(() {
-                                              selectedStationId =
-                                                  foundStations[index]['id'];
-                                              selectedStationIndex =
-                                                  foundStations[index]['index'];
-                                            });
-                                          }
+                                          setState(() {
+                                            selectedStationId =
+                                                foundStations[index]['id'];
+                                            selectedStationIndex =
+                                                foundStations[index]['index'];
+                                            showStationSummary = true;
+                                          });
                                         },
                                         radioCallback: (radioValue) {
                                           changeMapLocation(
@@ -355,15 +353,13 @@ class _LandingPageState extends State<LandingPage> {
                                             index: index,
                                             updatedValue: radioValue,
                                           );
-                                          if (textfieldValue != '') {
-                                            // assign particular values when clicked
-                                            setState(() {
-                                              selectedStationId =
-                                                  foundStations[index]['id'];
-                                              selectedStationIndex =
-                                                  foundStations[index]['index'];
-                                            });
-                                          }
+                                          setState(() {
+                                            selectedStationId =
+                                                foundStations[index]['id'];
+                                            selectedStationIndex =
+                                                foundStations[index]['index'];
+                                            showStationSummary = true;
+                                          });
                                         },
                                         branchName:
                                             'SEAOIL ${foundStations[index]['province']} - ${foundStations[index]['city']}',
